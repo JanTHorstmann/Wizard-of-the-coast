@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Wizard of the Coast</title>
+    <script src="./classes/drawable-objects.class.js"></script>
+    <script src="./classes/movable-objects.class.js"></script>
+    <script src="classes/statusbar-health.class.js"></script>
+    <script src="classes/statusbar-mana.class.js"></script>
+    <script src="classes/mana-potion.class.js"></script>
+    <script src="classes/health-potion.class.js"></script>
+    <script src="classes/throwable-objects.class.js"></script>
+    <script src="./classes/character.class.js"></script>
+    <script src="./classes/fire-wizard.class.js"></script>
+    <script src="classes/enemies.class.js"></script>
+    <script src="classes/demon.class.js"></script>
+    <script src="classes/lizard.class.js"></script>
+    <script src="classes/background-object.class.js"></script>
+    <script src="./classes/keyboard.class.js"></script>
+    <script src="./classes/world.class.js"></script>
+    <script src="classes/level.class.js"></script>
+    <script src="classes/endboss.class.js"></script>
+    <script src="classes/throwable-enemie-objects.class.js"></script>
+    <script src="levels/level1.js"></script>
+    <script src="./js/game.js"></script>
+    <script src="./js/render.js"></script>
+</head>
+
+<body onload="init()">
+    <h1>Wizard of the Coast</h1>
+    <div id="titelscreen" class="titelscreen"></div>
+    <div id="rotatescreen">
+        <img src="./img/rotate_display.png" alt="">
+    </div>
+    <div id="fullscreen" class="canvas d-none">
+        <div id="get_fullscreen" class="get-fullscreen">
+            <img src="./img/fullscreen.png" onclick="openFullScreen()">
+        </div>
+        <canvas id="canvas" width="720" height="480"></canvas>
+        <div class="titelscreen-pannel">
+            <div class="pannel-hud">
+                <div class="pannel-attacks">
+                    <div id="btn_special_attack" class="pannel special-attack">
+                        <img src="./img/responsive_pannel/special-attack.png">
+                    </div>
+                    <div id="btn_standard_attack" class="pannel standard-attack">
+                        <img src="./img/responsive_pannel/standard-attack.png">
+                    </div>
+                </div>
+                <div class="pannel-moves">
+                    <div id="btn_move_left" class="pannel pannel-move">
+                        <img src="./img/responsive_pannel/arrow-left.png" alt="">
+                    </div>
+                    <div id="btn_jump" class="pannel jump">
+                        <img src="./img/responsive_pannel/arrow-up.png" alt="">
+                    </div>
+                    <div id="btn_move_right" class="pannel pannel-move">
+                        <img src="./img/responsive_pannel/arrow-right.png" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
