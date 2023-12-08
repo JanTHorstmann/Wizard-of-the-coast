@@ -1,9 +1,9 @@
 class World {
-    // startscreen = new Startscreen(canvas)
     character = new FireWizard();
     level = level1;
     statusBarHealth = new StatusbarHealth();
     statusBarMana = new StatusbarMana();
+    statusBarHealthEndboss;
     collectibleItems = [];
     throwableObjects = [];
     throwableEnemieObjects = [];
@@ -12,6 +12,8 @@ class World {
     specialThrowObject = false;
     isColliding = false;
     hasEndbossAttack = false;
+    world_sound = new Audio('audio/background-music-1.mp3');
+    soundCount = 0;
     canvas;
     keyboard;
     ctx;
@@ -25,18 +27,37 @@ class World {
         this.draw();
         this.setWorld();
         this.run();
+        this.playWorldSound();
     }
 
+    /**
+     * play background music
+     */
+    playWorldSound() {
+        setStoppableInterval(() => {
+            if (soundOn) {
+                this.world_sound.play();
+            } else {
+                this.world_sound.pause();
+            }
+        }, 50);
+    }
+
+    /**
+     * sets a reference from the character to the world
+     */
     setWorld() {
         this.character.world = this;
     }
 
+    /**
+     * checks collisions of all objects
+     */
     run() {
         setStoppableInterval(() => {
             this.collisionCharactertoEnemie();
-
             this.checkThrowableObjects();
-            this.checkCollisionCollectebleItem();
+            this.checkCollisiontoCollectebleItem();
             if (this.throwableObjects[0]) {
                 this.checkCollisionsThrowableObject();
             }
@@ -46,10 +67,9 @@ class World {
         }, 50);
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //-----------------------------check collision from Enemie to Character-----------------------------//
-    //--------------------------------------------------------------------------------------------------//
+    /**
+     * checks collision from character to enemie
+     */
     collisionCharactertoEnemie() {
         this.level.enemies.forEach(enemy => {
             if (this.character.isCollidingToObject(enemy)) {
@@ -65,6 +85,9 @@ class World {
         this.statusBarHealth.setHealthPercentage(this.character.energy);
     }
 
+    /**
+     * checks collision from character to throwobject
+     */
     collisionCharactertoThrowObject() {
         this.throwableEnemieObjects.forEach(obj => {
             if (this.character.isCollidingToObject(obj)) {
@@ -78,12 +101,10 @@ class World {
         });
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //------------------------------check collision from Character to Item------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
-    checkCollisionCollectebleItem() {
+    /**
+     * checks collision from character to collectitem
+     */
+    checkCollisiontoCollectebleItem() {
         this.collectibleItems.forEach(item => {
             if (this.character.isCollidingToItem(item)) {
                 if (item instanceof Manapotion) {
@@ -97,11 +118,10 @@ class World {
         this.removeCollectItems();
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //----------------------------------------fill Mana Statusbar---------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * fill statusbar mana
+     * @param {class} item 
+     */
     fillMana(item) {
         if (this.character.mana < 5) {
             item.collect = true;
@@ -110,10 +130,10 @@ class World {
         }
     }
 
-    //--------------------------------------------------------------------------------------------------//
-    //---------------------------------------fill Health Statusbar--------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * fill statusbar health
+     * @param {class} item 
+     */
     fillHealth(item) {
         if (this.character.energy < 5) {
             item.collect = true;
@@ -122,20 +142,16 @@ class World {
         }
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //---------------------------------------remove collected Items-------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * remove item if collect = true
+     */
     removeCollectItems() {
         this.collectibleItems = this.collectibleItems.filter(item => item.collect == false);
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //--------------------------check collision from throwable Object to Enemie-------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * checks collision from throwobject of character to enemie
+     */
     checkCollisionsThrowableObject() {
         let isColliding = false;
         this.throwableObjects.forEach(throwObj => {
@@ -143,19 +159,23 @@ class World {
                 if (throwObj.isCollidingToObject(enemy)) {
                     isColliding = true;
                     let damage = throwObj.damage
-                    this.collisionToEnemie(enemy, isColliding, damage);
-                    this.collisionToEndboss(enemy, isColliding, damage)
+                    if(enemy instanceof Endboss) {
+                        this.collisionToEndboss(enemy, isColliding, damage)
+                    } else {
+                        this.collisionToEnemie(enemy, isColliding, damage);
+                    }
                     this.removeThrowableObject();
                 }
             })
         });
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //-------------------------------------check collision to Enemie------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * is colliding, the enemie get hurt and lost energy
+     * @param {class} enemy 
+     * @param {boolean} isColliding 
+     * @param {number} damage 
+     */
     collisionToEnemie(enemy, isColliding, damage) {
         if (enemy.energy > 0) {
             enemy.isHurt = isColliding;
@@ -171,6 +191,10 @@ class World {
         }
     }
 
+    /**
+     * Receive a potion dropped by a dead enemie
+     * @param {object} enemy 
+     */
     getRandomPotion(enemy) {
         const randomNumber = Math.floor(Math.random() * 2) + 1;
         if (randomNumber == 1) {
@@ -181,23 +205,23 @@ class World {
         }
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //-------------------------------------check collision to Endboss-----------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * is colliding, the endboss get hurt and lost energy
+     * @param {class} enemy 
+     * @param {boolean} isColliding 
+     * @param {number} damage 
+     */
     collisionToEndboss(enemy, isColliding, damage) {
         if (enemy.endbossEnergy > 0) {
             enemy.endbossHurt = isColliding;
             enemy.endbossEnergy = enemy.endbossEnergy - damage;
+            this.statusBarHealthEndboss.setEndbossHealthPercentage(enemy.endbossEnergy)
         }
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //-----------------------------------------remove dead Enemies--------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * remove all dead enemies
+     */
     removeDeadEnemies() {
         this.level.enemies = this.level.enemies.filter(enemy => {
             if (enemy.endbossEnergy !== undefined) {
@@ -208,12 +232,9 @@ class World {
         });
     }
 
-
-
-    //--------------------------------------------------------------------------------------------------//
-    //--------------------------create throwable Object for Character or Endboss------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * checks collisions between throwobject and enemie
+     */
     checkThrowableObjects() {
         if (this.standardThrowObject) {
             this.standardThrowAttack();
@@ -228,16 +249,22 @@ class World {
         });
     }
 
+    /**
+     * create a standard Throwattack
+     */
     standardThrowAttack() {
         if (this.character.otherDirection) {
-            this.magicAttack = new ThrowableObjects(this.character.x - 60, this.character.y, this.standardThrowObject, world, 'standardThrowObject');
+            this.magicAttack = new ThrowableObjects(this.character.x - 0, this.character.y - 20, this.standardThrowObject, world, 'standardThrowObject');
         } else {
-            this.magicAttack = new ThrowableObjects(this.character.x + 80, this.character.y, this.standardThrowObject, world, 'standardThrowObject');
+            this.magicAttack = new ThrowableObjects(this.character.x + 0, this.character.y - 20, this.standardThrowObject, world, 'standardThrowObject');
         }
         this.throwableObjects.push(this.magicAttack);
         this.standardThrowObject = false;
     };
 
+    /**
+     * create a special Throwattack
+     */
     specialThrowAttack() {
         if (this.character.mana < 1) {
             this.statusBarMana.manaAlert = true;
@@ -245,15 +272,19 @@ class World {
             this.character.mana--;
             this.statusBarMana.setManaPercentage(this.character.mana)
             if (this.character.otherDirection) {
-                this.magicAttack = new ThrowableObjects(this.character.x - 60, this.character.y, this.specialThrowObject, world, 'specialThrowObject');
+                this.magicAttack = new ThrowableObjects(this.character.x - 20, this.character.y, this.specialThrowObject, world, 'specialThrowObject');
             } else {
-                this.magicAttack = new ThrowableObjects(this.character.x + 80, this.character.y, this.specialThrowObject, world, 'specialThrowObject');
+                this.magicAttack = new ThrowableObjects(this.character.x + 20, this.character.y, this.specialThrowObject, world, 'specialThrowObject');
             }
             this.throwableObjects.push(this.magicAttack);
         }
         this.specialThrowObject = false;
     };
 
+    /**
+     * create a Boss Throwattack
+     * @param {object} enemy 
+     */
     bossThrowAttack(enemy) {
         if (enemy.endbossAttack) {
             enemy.endbossThrowAttack = true;
@@ -266,17 +297,13 @@ class World {
         }
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //---------------------------------------draw Elements at Canvas------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * draw all elements at the canvas
+     */
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         this.ctx.translate(this.camera_x, 0);
         this.addObjectsToMap(this.level.backgroundObjects);
-        // this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.collectibleItems);
         this.addObjectsToMap(this.throwableEnemieObjects);
@@ -285,48 +312,43 @@ class World {
         this.ctx.translate(-this.camera_x, 0);
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarMana);
-
+        if (this.statusBarHealthEndboss) {
+            this.addToMap(this.statusBarHealthEndboss);
+        };
         let self = this;
         requestAnimationFrame(function () {
             self.draw();
-        })
+        });
     }
 
-
-
-    //--------------------------------------------------------------------------------------------------//
-    //----------------------------------------draw Objects at Canvas------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * add all Objects to Map
+     * @param {object} objects 
+     */
     addObjectsToMap(objects) {
         objects.forEach(o => {
             this.addToMap(o);
         });
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //------------------------------------draw MovableObjects at Canvas---------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * add the Object to map
+     * @param {object} movableObject 
+     */
     addToMap(movableObject) {
         if (movableObject.otherDirection) {
             this.turnImage(movableObject);
         }
         movableObject.draw(this.ctx);
-        // movableObject.drawFrame(this.ctx);
-
-
         if (movableObject.otherDirection) {
             this.turnImageBack(movableObject);
         }
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //----------------------------------------------turn Image------------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * Rotates image on the X axis
+     * @param {object} movableObject 
+     */
     turnImage(movableObject) {
         this.ctx.save();
         this.ctx.translate(movableObject.width, 0);
@@ -334,31 +356,26 @@ class World {
         movableObject.x = movableObject.x * -1
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //-------------------------------------------turn Image back----------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * Rotates image back on the X axis
+     * @param {object} movableObject 
+     */
     turnImageBack(movableObject) {
         movableObject.x = movableObject.x * -1
         this.ctx.restore();
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //--------------------------------remove throeable Object from Character----------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * remove throwable Object from Character
+     */
     removeThrowableObject() {
         this.throwableObjects = [];
     }
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //---------------------------------remove throeable Object from Endboss-----------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
-    removeEnemieAttackImage() {
+    /**
+     * remove throwable Object from Boss
+     */
+    removeEnemieThrowAttack() {
         this.throwableEnemieObjects = [];
     }
 }

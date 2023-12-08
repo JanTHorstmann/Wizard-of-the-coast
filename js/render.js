@@ -1,5 +1,8 @@
 let titelScreen
 
+/**
+ * show startscreen
+ */
 function init() {
     titelScreen = document.getElementById('titelscreen');
     titelScreen.style.backgroundImage = 'url("img/titelscreen.png")';
@@ -8,17 +11,28 @@ function init() {
     // generateWorld();
 }
 
+/**
+ * Render the start screen HTML.
+ * @returns {string} The HTML string for the start screen button.
+ */
 function renderStartscreen() {
    return `<button class="start-btn" onclick="generateWorld()">Start Game</button>`;
 }
 
-function deadScreen() {
+/**
+ * Modifies the display behavior of the end screen and adjusts the background image accordingly.
+ * @param {string} screenType
+ */
+function endScreen(screenType) {
     document.getElementById('titelscreen').classList.remove('d-none');
     document.getElementById('fullscreen').classList.add('d-none');
-    titelScreen.style.backgroundImage = 'url("img/diedscreen.png")';
+    titelScreen.style.backgroundImage = `url("img/${screenType}.png")`;
     titelScreen.innerHTML = '<button class="start-btn" onclick="generateWorld()">Neu Start</button>'
 }
 
+/**
+ * Add event for responsive
+ */
 function pannelAktivate() {
     document.getElementById('btn_special_attack').addEventListener('touchstart', (e) => {
         e.preventDefault();

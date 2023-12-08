@@ -24,13 +24,17 @@ class StatusbarMana extends MovableObject {
         this.loadImages(this.IMAGES_MANA);
         this.loadImages(this.IMAGES_MANA_ALERT);
         this.x = 30;
-        this.y = 60;
-        this.width = 350;
-        this.height = 40
+        this.y = 110;
+        this.width = 300;
+        this.height = 30;
         this.setManaPercentage(0);
         this.alert();
     }
 
+    /**
+     * set Statusbar equal to energy
+     * @param {number} percentage 
+     */
     setManaPercentage(percentage) {
         this.percentage = percentage;
         let path = this.IMAGES_MANA[this.getImageIndex()];
@@ -38,9 +42,10 @@ class StatusbarMana extends MovableObject {
 
     }
 
-
-
-
+    /**
+     * checks which images are required by Stausbar
+     * @returns
+     */
     getImageIndex() {
         if (this.percentage == 5) {
             return 5
@@ -57,6 +62,9 @@ class StatusbarMana extends MovableObject {
         }
     }
 
+    /**
+     * change Image if manaAlert is true
+     */
     alert() {
         setInterval(() => {
             if (this.manaAlert) {

@@ -9,7 +9,7 @@ class Endboss extends MovableObject {
     endbossThrowAttack = false;
     endbossHurt = false;
     endbossDead = false;
-    endbossEnergy = 6;
+    endbossEnergy = 5;
 
     offSet = {
         top: 20,
@@ -67,109 +67,150 @@ class Endboss extends MovableObject {
     attackImageCounter = this.IMAGES_ATTACK.length;  //for Attack Intervall
     walkImageCounter = this.IMAGES_WALKING.length; //for Walking Intervall
 
-
-    //--------------------------------------------------------------------------------------------------//
-    //---------------------------------------animate all Picture----------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
-
+    /**
+     * start animation sequence
+     */
     animate() {
         setStoppableInterval(() => {
             if (this.canIdleAnimate()) {
                 this.idleAnimation();
             } else {
-                if (this.canStartRandomAnimationFolder()) {
-                    this.getRandomNumberForAnimation();
-                }
-                if (this.canAttackAnimate()) {
-                    this.attackAnimation();
-                }
-                if (this.canWalkAnimate()) {
-                    this.walkAnimation();
-                }
+                this.startRandomAnimation();
             }
-            //------------------------------Check if Charcter at X Coordinate----------------------------//
             if (world) {
-                if (world.character.x > 3445 && !this.hadFirstContact) {
-                    this.idleImageCounter = 0;
-                    this.hadFirstContact = true;
-                }
+                this.isFirstContact();
             }
-            //---------------------------------------Hurt animation-------------------------------------//
             if (this.endbossHurt && !this.endbossDead) {
                 this.hurtAnimation();
             }
-            //---------------------------------------Dead animation-------------------------------------//
             if (this.endbossDead) {
                 this.dieAnimation();
             }
         }, 200)
-    } //end animate
+    }
 
+    /**
+     * start a random Animation
+     */
+    startRandomAnimation() {
+        if (this.canStartRandomAnimationFolder()) {
+            this.getRandomNumberForAnimation();
+        };
+        if (this.canAttackAnimate()) {
+            this.attackAnimation();
+        };
+        if (this.canWalkAnimate()) {
+            this.walkAnimation();
+        };
+    }
+
+    /**
+     * check if can animate Idle
+     * @returns 
+     */
     canIdleAnimate() {
         return this.idleImageCounter < 10 &&
             this.hadFirstContact &&
             !this.endbossHurt &&
-            !this.endbossDead
+            !this.endbossDead;
     }
 
+    /**
+     * Checks whether a new pure sequence can be defined
+     * @returns 
+     */
     canStartRandomAnimationFolder() {
         return this.attackImageCounter == this.IMAGES_ATTACK.length &&
             this.walkImageCounter == this.IMAGES_WALKING.length &&
             this.hadFirstContact;
     }
 
+    /**
+     * checks whether can animate Attack
+     * @returns
+     */
     canAttackAnimate() {
         return this.attackImageCounter < this.IMAGES_ATTACK.length &&
             this.walkImageCounter == this.IMAGES_WALKING.length &&
             !this.endbossHurt && !this.endbossDead;
     }
 
+    /**
+     * checks whether can animate Walking
+     * @returns 
+     */
     canWalkAnimate() {
         return this.walkImageCounter < this.IMAGES_WALKING.length &&
             this.attackImageCounter == this.IMAGES_ATTACK.length &&
             !this.endbossHurt && !this.endbossDead;
     }
 
+    /**
+     * get a Randomnumber for an animation
+     */
     getRandomNumberForAnimation() {
         const randomNumber = Math.floor(Math.random() * 2) + 1;
         if (randomNumber == 1) {
             this.attackImageCounter = 0;
         } else {
             this.walkImageCounter = 0;
-        }
+        };
+    }
+    
+    /**
+     * checks whether the character is at x coordinate
+     */
+    isFirstContact() {
+        if (world.character.x > 3445 && !this.hadFirstContact) {
+            world.statusBarHealthEndboss = new StatusbarHealthEndboss();
+            this.idleImageCounter = 0;
+            this.hadFirstContact = true;
+        };
     }
 
+    /**
+     * play idle animation
+     */
     idleAnimation() {
         this.playAnimation(this.IMAGES_IDLE, this.currentImageEnemie, 'enemie');
         this.idleImageCounter++
         if (this.idleImageCounter == this.IMAGES_IDLE.length) {
             this.currentImageEnemie = 0;
-        }
+        };
     }
 
+    /**
+     * play attack animation
+     */
     attackAnimation() {
         this.playAnimation(this.IMAGES_ATTACK, this.currentImageEnemie, 'enemie');
         this.attackImageCounter++
         if (this.attackImageCounter == this.IMAGES_ATTACK.length) {
             this.endbossAttack = true;
             this.currentImageEnemie = 0;
-        }
+        };
     }
 
+    /**
+     * play walk animation
+     */
     walkAnimation() {
         this.playAnimation(this.IMAGES_WALKING, this.currentImageEnemie, 'enemie');
         this.moveLeft();
         this.walkImageCounter++
         if (this.walkImageCounter == this.IMAGES_WALKING.length) {
             this.currentImageEnemie = 0;
-        }
+        };
     }
 
+    /**
+     * play hurt animation
+     */
     hurtAnimation() {
         if (this.endbossEnergy > 0) {
             this.playAnimation(this.IMAGES_HURT, this.currentImageEnemieHurt, 'enemie');
             this.intervalCounterEnemie++
-            if (this.intervalCounterEnemie > this.IMAGES_HURT.length) {
+            if (this.intervalCounterEnemie == this.IMAGES_HURT.length) {
                 this.currentImageEnemie = 0;
                 this.currentImageEnemieHurt = 0;
                 this.intervalCounterEnemie = 0;
@@ -179,14 +220,20 @@ class Endboss extends MovableObject {
             this.currentImageEnemieHurt = 0;
             this.endbossHurt = false;
             this.endbossDead = true;
-        }
+        };
     }
 
+    /**
+     * play die animation
+     */
     dieAnimation() {
         this.playAnimation(this.IMAGES_DEATH, this.currentImageEnemieHurt, 'enemie');
         this.intervalCounterEnemie++
-        if (this.intervalCounterEnemie >= this.IMAGES_DEATH.length) {
-            stoppGame();
-        }
+        if (this.intervalCounterEnemie == this.IMAGES_DEATH.length) {
+            stoppGame('win');
+            setTimeout(() => {
+                endScreen('winningscreen');
+            }, 1000);
+        };
     }
 }

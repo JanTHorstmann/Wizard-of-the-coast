@@ -5,9 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="img/fire_wizard/fire_ball_geste/img5.png" type="image/x-icon">
     <title>Wizard of the Coast</title>
     <script src="./classes/drawable-objects.class.js"></script>
     <script src="./classes/movable-objects.class.js"></script>
+    <script src="classes/statusbar-health-endboss.class.js"></script>
     <script src="classes/statusbar-health.class.js"></script>
     <script src="classes/statusbar-mana.class.js"></script>
     <script src="classes/mana-potion.class.js"></script>
@@ -37,7 +39,8 @@
     </div>
     <div id="fullscreen" class="canvas d-none">
         <div id="get_fullscreen" class="get-fullscreen">
-            <img src="./img/fullscreen.png" onclick="openFullScreen()">
+            <img id="volume" src="./img/volume.png" alt="" onclick="muteAndPlaySounds('off')">
+            <img id="toggle_fullscreen" src="./img/fullscreen.png" onclick="toggleFullscreen()">
         </div>
         <canvas id="canvas" width="720" height="480"></canvas>
         <div class="titelscreen-pannel">

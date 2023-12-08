@@ -55,9 +55,6 @@ class FireWizard extends Character {
         'img/fire_wizard/flame_jet_geste/img9.png',
         'img/fire_wizard/flame_jet_geste/img10.png',
         'img/fire_wizard/flame_jet_geste/img11.png',
-        'img/fire_wizard/flame_jet_geste/img12.png',
-        'img/fire_wizard/flame_jet_geste/img13.png',
-        'img/fire_wizard/flame_jet_geste/img14.png',
     ];
 
     IMAGES_HURT = [

@@ -1,11 +1,29 @@
 let level1
 
+/**
+ * generate a new random Level
+ */
 function generateNewLevel(){
 enemieThrowObject = false;
 const randomNumber = Math.floor(Math.random() * 4) + 1;
-
-
 if (randomNumber == 1) {
+    generateVilla();
+};
+if (randomNumber == 2) {
+    generateGravyard1();
+};
+if (randomNumber == 3) {
+    generateGravyard2();
+};
+if (randomNumber == 4) {
+    generateDarkforest();
+};
+}
+
+/**
+ * generate Villa Background
+ */
+function generateVilla() {
     level1 = new Level(
         [
             new Lizard(500),
@@ -25,9 +43,12 @@ if (randomNumber == 1) {
         'layer2/villa.png',                 // layer 2
         'layer1/villa.png',                 // layer 1
     );
-};
+}
 
-if (randomNumber == 2) {
+/**
+ * generate Graveyard1 Background
+ */
+function generateGravyard1() {
     level1 = new Level(
         [
             new Demon(500),
@@ -47,9 +68,12 @@ if (randomNumber == 2) {
         'layer2/graveyard1.png',                 // layer 2
         'layer1/graveyard1.png',                 // layer 1
     );
-};
+}
 
-if (randomNumber == 3) {
+/**
+ * generate Gravyard2 Background
+ */
+function generateGravyard2() {
     level1 = new Level(
         [
             new Demon(500),
@@ -69,9 +93,12 @@ if (randomNumber == 3) {
         'layer2/graveyard2.png',                 // layer 2
         'layer1/graveyard2.png',                 // layer 1
     );
-};
+}
 
-if (randomNumber == 4) {
+/**
+ * generate Darkforest Background
+ */
+function generateDarkforest() {
     level1 = new Level(
         [
             new Lizard(500),
@@ -91,5 +118,4 @@ if (randomNumber == 4) {
         'layer2/darkforest.png',                 // layer 2
         'layer1/darkforest.png',                 // layer 1
     );
-};
 }

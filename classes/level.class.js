@@ -3,6 +3,17 @@ class Level {
     backgroundObjects = [];
     level_end_x = 4200;
 
+    /**
+     * build background in a for loop
+     * @param {string} basePath
+     * @param {string} air 
+     * @param {string} sixthLayerImg1 
+     * @param {string} fifthLayerImg1 
+     * @param {string} fourthLayerImg1 
+     * @param {string} thirdLayerImg1 
+     * @param {string} secondLayerImg1 
+     * @param {string} firstLayerImg1 
+     */
     repeatBackgroundImages(basePath, air, sixthLayerImg1, fifthLayerImg1, fourthLayerImg1, thirdLayerImg1, secondLayerImg1, firstLayerImg1) {
         for (let i = 0; i < 4; i++) {
             let x_coordinate = i * 1438;

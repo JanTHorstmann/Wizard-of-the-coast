@@ -15,171 +15,98 @@ class Character extends MovableObject {
     attackFireBallGeste = false;
     attackFlameJetGeste = false;
 
-
-
-
     walking_sound = new Audio('audio/running.mp3');
     jumping_sound = new Audio('audio/jump.mp3');
     hurt_sound = new Audio('audio/hurt.mp3');
 
-
-
-    //--------------------------------------------------------------------------------------------------//
-    //---------------------------------------animate all Picture----------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
+    /**
+     * start Intervalls for animation
+     */
     animate() {
-        //---------------------------------check Idle for animation---------------------------------//
         setStoppableInterval(() => {
             if (this.canAnimateIdle()) {
-                this.clearIntervalCounter();
-                this.idle = true;
-            }
-        }, 1000);
-
-        setStoppableInterval(() => {
-            //--------------------------------------Idle animation-------------------------------------//
-            if (this.idle && !this.jumping && !this.dead) {
-                this.playAnimation(this.IMAGES_IDLE, this.currentImageCharacter, 'character')
-                this.intervalCounter++
-                if (this.intervalCounter > this.IMAGES_IDLE.length) {
-                    this.clearIntervalCounter();
-                };                
+                this.animateIdle();
             };
         }, 200);
 
         setStoppableInterval(() => {
             this.clearAnimationSounds();
-            //---------------------------activate Standard Attack animation---------------------------//
-            if (this.world.keyboard.S && !this.attack1 && !this.standardAttackGeste && !this.dead) {
-                this.clearAnimationCondition();
-                this.standardAttackGeste = true;
-                this.currentImageCharacter = 0;
-                this.clearIntervalCounter();
-            };
-
-            //---------------------------activate Special Attack animation--------------------------//
-            if (this.world.keyboard.A && !this.standardAttackGeste && !this.specialAttackGeste && !this.dead) {
-                this.clearAnimationCondition();
-                this.specialAttackGeste = true;
-                this.currentImageCharacter = 0;
-                this.clearIntervalCounter();
-            };
-
-            //-------------------------------Charcter move up and Fall-------------------------------//
-            if (this.world.keyboard.Up && !this.isAboveGround() && !this.jumping && !this.dead) {
-                this.playAnimationSound('jumpSound');
-                this.jump();
-                this.clearIntervalCounter();
-                this.clearAnimationCondition();
-                this.jumping = true;
-                this.currentImageCharacter = 0;
-            };
-
-            //-----------------------------Move Right and Left animation-----------------------------//
-            this.clearAnimationSounds();
-            if (this.world.keyboard.Right && !this.hurt && !this.jumping && !this.dead || this.world.keyboard.Left && !this.hurt && !this.jumping && !this.dead) {
-                this.playAnimationSound('walkSound');
-                this.clearAnimationCondition();
-                this.playAnimation(this.IMAGES_WALKING, this.currentImageCharacter, 'character');
-            };
-
-            //-------------------------------Standard Attack animation-------------------------------//
-            if (this.standardAttackGeste && !this.dead) {
-                this.playAnimation(this.IMAGES_STANDARD_ATTACK_GESTE, this.currentImageCharacter, 'character');
-                this.intervalCounter++;
-                if (this.intervalCounter > this.IMAGES_STANDARD_ATTACK_GESTE.length) {
-                    this.clearIntervalCounter();
-                    this.standardAttackGeste = false
-                    this.world.standardThrowObject = true;
-                    this.loadImage(this.IMAGES_IDLE[0]);
-                };
-            };
-
-            //------------------------------------Hurt animation------------------------------------//
-            if (this.hurt && !this.dead) {
-                this.playAnimationSound('hurtSound');
-                this.clearAnimationCondition();
-                this.playAnimation(this.IMAGES_HURT, this.currentImageCharacter, 'character');
-                this.intervalCounter++
-                if (this.intervalCounter > this.IMAGES_HURT.length) {
-                    this.clearIntervalCounter();
-                    this.currentImageCharacter = 0;
-                    this.hurt = false;
-                    if (this.energy > 0) {
-                        this.energy--;
-                    } else {
-                        this.dead = true;
-                    };
-                };
-            };
-
-            //------------------------------------Dead animation------------------------------------//
-            if (this.dead) {
-                this.playAnimation(this.IMAGES_DEAD, this.currentImageCharacter, 'character')
-                this.intervalCounter++;
-                if (this.intervalCounter >= this.IMAGES_DEAD.length) {
-                    this.loadImage(this.IMAGES_DEAD[5]);
-                    stoppGame();
-                    setTimeout(() => {
-                        deadScreen();
-                    }, 500);
-                };
-            };
+            this.enableAnimations();
+            this.activateAnimations();
         }, 100);
 
-        //------------------------------Move Right and Left on Map------------------------------//
         setStoppableInterval(() => {
-            if (this.canMoveRight()) {
-                this.moveRight();
-                this.otherDirection = false;
-            }
-            if (this.canMoveLeft()) {
-                this.moveLeft();
-                this.otherDirection = true;
-            }
-            this.world.camera_x = -this.x + 100;
+            this.moveLeftOrRight()
         }, 1000 / 60);
 
-        //-----------------------------------Jump animation------------------------------------//
         setStoppableInterval(() => {
-            if (this.jumping && !this.dead && !this.hurt) {
-                this.playAnimation(this.IMAGES_JUMPING, this.currentImageCharacter, 'character')
-                this.intervalCounter++
-                if (this.intervalCounter > this.IMAGES_JUMPING.length) {
-                    this.currentImageCharacter = 0;
-                    this.clearAnimationSounds('jumpSound');
-                    this.loadImage(this.IMAGES_IDLE[0]);
-                    this.clearIntervalCounter();
-                    this.jumping = false;
-                };
+            if (this.canAnimateJump()) {
+                this.animateJump();
             };
-
-            //-------------------------------Special Attack animation-------------------------------//
-            if (this.specialAttackGeste) {
-                this.playAnimation(this.IMAGES_SPECIAL_ATTACK_GESTE, this.currentImageCharacter, 'character');
-                this.intervalCounter++;
-                if (this.intervalCounter > this.IMAGES_SPECIAL_ATTACK_GESTE.length) {
-                    this.clearIntervalCounter();
-                    this.specialAttackGeste = false
-                    this.world.specialThrowObject = true;
-                    this.loadImage(this.IMAGES_IDLE[0]);
-                };
+            if (this.canAnimateSpecialAttack()) {
+                this.animateSpecialAttack();
             };
         }, 100);
-    }; //animate end
+    };
 
+    /**
+     * activate Sound for animation
+     * @param {string} soundAnimation 
+     */
     playAnimationSound(soundAnimation) {
-        if (soundAnimation == 'jumpSound') {
-            this.jumping_sound.play();
-        }
-        if (soundAnimation == 'walkSound') {
-            this.walking_sound.play();
-        }
-        if (soundAnimation == 'hurtSound') {
-            this.hurt_sound.play();
+        if (soundOn) {
+            if (soundAnimation == 'jumpSound') {
+                this.jumping_sound.play();
+            }
+            if (soundAnimation == 'walkSound') {
+                this.walking_sound.play();
+            }
+            if (soundAnimation == 'hurtSound') {
+                this.hurt_sound.play();
+            }
         }
     }
 
+    /**
+     *  enable Animationcondition
+     */
+    enableAnimations() {
+        // this.clearAnimationSounds();
+        if (this.canEnableIdle()) {
+            this.enableIdle();
+        };
+        if (this.canEnableStandardAttack()) {
+            this.enableStandardAttack();
+        };
+        if (this.canEnableSpecialAttack()) {
+            this.enableSpecialAttack();
+        };
+        if (this.canEnableJump()) {
+            this.enableJump();
+        };
+    }
+
+    /**
+     * play Animations
+     */
+    activateAnimations() {
+        if (this.canAnimateWalking()) {
+            this.animateWalking();
+        };
+        if (this.canAnimateStandardAttack()) {
+            this.animateStandardAttack();
+        };
+        if (this.canAnimateHurt()) {
+            this.animateHurt();
+        };
+        if (this.canAnimateDead()) {
+            this.animateDead();
+        };
+    }
+
+    /**
+     * clear Animation condition
+     */
     clearAnimationCondition() {
         this.idle = false;
         this.jumping = false;
@@ -189,6 +116,10 @@ class Character extends MovableObject {
         this.specialAttackGeste = false;
     }
 
+    /**
+     * clear Animationsounds
+     * @param {string} soundAnimation 
+     */
     clearAnimationSounds(soundAnimation) {
         if (soundAnimation == 'jumpSound') {
             this.jumping_sound.pause();
@@ -198,7 +129,11 @@ class Character extends MovableObject {
         }
     }
 
-    canAnimateIdle() {
+    /**
+     * check if can enable Idle conditions
+     * @returns idle is true if all conditions are false
+     */
+    canEnableIdle() {
         return !this.specialAttackGeste && !this.jumping && !this.hurt &&
             !this.idle && !this.dead && !this.standardAttackGeste &&
             !this.world.fireBall && !this.world.keyboard.Right && !this.world.keyboard.Left &&
@@ -207,14 +142,264 @@ class Character extends MovableObject {
             !this.world.keyboard.D
     }
 
+    /**
+     * enable Idle condition
+     */
+    enableIdle() {
+        this.clearIntervalCounter();
+        this.idle = true;
+    }
+
+    /**
+     * check if can enable Idle animation
+     * @returns idle animation is true if jumping and dead are false
+     */
+    canAnimateIdle() {
+        return this.idle && !this.jumping && !this.dead;
+    }
+
+    /**
+     * play Idle animation
+     */
+    animateIdle() {
+        this.playAnimation(this.IMAGES_IDLE, this.currentImageCharacter, 'character')
+        this.intervalCounter++;
+        if (this.intervalCounter == this.IMAGES_IDLE.length) {
+            this.clearIntervalCounter();
+        };
+    }
+
+    /**
+     * check if can enable StandardAttack conditions
+     * @returns is true if pressed Key S and standardAttackGeste, dead and hurt are false
+     */
+    canEnableStandardAttack() {
+        return this.world.keyboard.S && !this.standardAttackGeste
+            && !this.dead && !this.hurt;
+    }
+
+    /**
+     * enable StandardAttack condition
+     */
+    enableStandardAttack() {
+        this.clearAnimationCondition();
+        this.standardAttackGeste = true;
+        this.currentImageCharacter = 0;
+        this.clearIntervalCounter();
+    }
+
+    /**
+     * check if can enable StandardAttack animation
+     * @returns StandardAttack animation is true if hurt and dead are false
+     */
+    canAnimateStandardAttack() {
+        return this.standardAttackGeste && !this.hurt && !this.dead;
+    }
+
+    /**
+     * play StandardAttack
+     */
+    animateStandardAttack() {
+        this.playAnimation(this.IMAGES_STANDARD_ATTACK_GESTE, this.currentImageCharacter, 'character');
+        this.intervalCounter++;
+        if (this.intervalCounter == this.IMAGES_STANDARD_ATTACK_GESTE.length) {
+            this.clearIntervalCounter();
+            this.standardAttackGeste = false
+            this.world.standardThrowObject = true;
+            this.loadImage(this.IMAGES_IDLE[0]);
+        };
+    }
+
+    /**
+     * check if can enable SpecialAttack conditions
+     * @returns is true if pressed Key A and standardAttackGeste, specialAttackGeste, dead and hurt are false
+     */
+    canEnableSpecialAttack() {
+        return this.world.keyboard.A && !this.standardAttackGeste &&
+            !this.specialAttackGeste && !this.dead && !this.hurt;
+    }
+
+    /**
+     * enable SpecialAttack condition
+     */
+    enableSpecialAttack() {
+        this.clearAnimationCondition();
+        this.specialAttackGeste = true;
+        this.currentImageCharacter = 0;
+        this.clearIntervalCounter();
+    }
+
+    /**
+     * check if can enable Jump conditions
+     * @returns is true if pressed Key ArrowUp and isAboveGround, jumping, dead are false
+     */
+    canEnableJump() {
+        return this.world.keyboard.Up && !this.isAboveGround() &&
+            !this.jumping && !this.dead;
+    }
+
+    /**
+     * enable Jump condition
+     */
+    enableJump() {
+        this.playAnimationSound('jumpSound');
+        this.jump();
+        this.clearIntervalCounter();
+        this.clearAnimationCondition();
+        this.jumping = true;
+        this.currentImageCharacter = 0;
+    }
+
+    /**
+     * check if can animate StandardAttack
+     * @returns is true if jumping true and dead and hurt are false
+     */
+    canAnimateJump() {
+        return this.jumping && !this.dead && !this.hurt;
+    }
+
+    /**
+     * play Jump animation
+     */
+    animateJump() {
+        this.playAnimation(this.IMAGES_JUMPING, this.currentImageCharacter, 'character')
+        this.intervalCounter++
+        if (this.intervalCounter == this.IMAGES_JUMPING.length) {
+            this.currentImageCharacter = 0;
+            this.clearAnimationSounds('jumpSound');
+            this.loadImage(this.IMAGES_IDLE[0]);
+            this.clearIntervalCounter();
+            this.jumping = false;
+        };
+    }
+
+    /**
+     * check if can animate Walking
+     * @returns is true if pressed Key ArrowRight and if hurt, jumping and dead are false or if pressed Key ArrowLeft and if hurt, jumping and dead are false
+     */
+    canAnimateWalking() {
+        return this.world.keyboard.Right && !this.hurt &&
+            !this.jumping && !this.dead ||
+            this.world.keyboard.Left && !this.hurt &&
+            !this.jumping && !this.dead;
+    }
+
+    /**
+     * play Walk animation
+     */
+    animateWalking() {
+        this.playAnimationSound('walkSound');
+        this.clearAnimationCondition();
+        this.playAnimation(this.IMAGES_WALKING, this.currentImageCharacter, 'character');
+    }
+
+    /**
+     * check if can move Right
+     * @returns is true if pressed Key ArrowRight and X of Character < Levelend
+     */
     canMoveRight() {
         return this.world.keyboard.Right && this.x < this.world.level.level_end_x
     }
 
-    canMoveLeft() {
-        return this.world.keyboard.Left && this.x > 100
+    /**
+     * check if can animate Hurt
+     * @returns is true if hurt and dead is false
+     */
+    canAnimateHurt() {
+        return this.hurt && !this.dead;
     }
 
+    /**
+     * play Hurt animation
+     */
+    animateHurt() {
+        this.playAnimationSound('hurtSound');
+        this.clearAnimationCondition();
+        this.playAnimation(this.IMAGES_HURT, this.currentImageCharacter, 'character');
+        this.intervalCounter++
+        if (this.intervalCounter >= this.IMAGES_HURT.length) {
+            this.clearIntervalCounter();
+            this.currentImageCharacter = 0;
+            this.hurt = false;
+            if (this.energy > 0) {
+                this.energy--;
+            } else {
+                this.dead = true;
+            };
+        };
+    }
+
+    /**
+     * check if can animate Dead
+     * @returns is true if dead is true
+     */
+    canAnimateDead() {
+        return this.dead;
+    }
+
+    /**
+     * play Dead animation
+     */
+    animateDead() {
+        this.playAnimation(this.IMAGES_DEAD, this.currentImageCharacter, 'character')
+        this.intervalCounter++;
+        if (this.intervalCounter == this.IMAGES_DEAD.length) {
+            this.loadImage(this.IMAGES_DEAD[5]);
+            stoppGame('lose');
+            setTimeout(() => {
+                endScreen('game-over');
+            }, 1000);
+        };
+    }
+
+    /**
+     * check if can animate SpecialAttack
+     * @returns 
+     */
+    canAnimateSpecialAttack() {
+        return this.specialAttackGeste && !this.dead && !this.hurt;
+    }
+
+    /**
+     * play SpecialAttack animation
+     */
+    animateSpecialAttack() {
+        this.playAnimation(this.IMAGES_SPECIAL_ATTACK_GESTE, this.currentImageCharacter, 'character');
+        this.intervalCounter++;
+        if (this.intervalCounter == this.IMAGES_SPECIAL_ATTACK_GESTE.length) {
+            this.clearIntervalCounter();
+            this.specialAttackGeste = false;
+            this.world.specialThrowObject = true;
+            this.loadImage(this.IMAGES_IDLE[0]);
+        };
+    }
+
+    /**
+     * check if can move Left
+     * @returns is true if pressed Key ArrowRight and X of Character < Levelend
+     */
+    canMoveLeft() {
+        return this.world.keyboard.Left && this.x > 100;
+    }
+
+    /**
+     * chek if can move Left or Right
+     */
+    moveLeftOrRight() {
+        if (this.canMoveRight()) {
+            this.moveRight();
+            this.otherDirection = false;
+        };
+        if (this.canMoveLeft()) {
+            this.moveLeft();
+            this.otherDirection = true;
+        };
+        this.world.camera_x = -this.x + 100;
+    }
+
+    /**
+     * reset Intervall Counter
+     */
     clearIntervalCounter() {
         this.intervalCounter = 0;
     }

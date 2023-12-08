@@ -10,11 +10,19 @@ class DrawableObjects {
     currentImageEnemie = 0;
     currentImageEnemieHurt = 0;
 
+    /**
+     * load an Image to draw
+     * @param {string} path 
+     */
     loadImage(path) {
-        this.img = new Image(); // ist gleich wie: this.img = document.getElementById('image');
+        this.img = new Image();
         this.img.src = path;
     };
 
+    /**
+     * load Image Array from Class
+     * @param {array} arr 
+     */
     loadImages(arr) {
         arr.forEach((path) => {
             let img = new Image();
@@ -23,6 +31,10 @@ class DrawableObjects {
         });
     };
 
+    /**
+     * Draws the image of the object on the canvas context
+     * @param {CanvasRenderingContext2D} ctx 
+     */
     draw(ctx) {
         try {
             ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
@@ -31,17 +43,12 @@ class DrawableObjects {
             console.log('Image couldn´t load', this.img, this);
         };
     };
-
-    // drawFrame(ctx) {
-    //     if (this instanceof Character || this instanceof ThrowableObjects || this instanceof ThrowableEnemieObjects || this instanceof Enemie || this instanceof Endboss || this instanceof Manapotion || this instanceof Healthpotion) {
-    //         ctx.beginPath();
-    //         ctx.lineWidth = '5';
-    //         ctx.strokeStyle = 'red';
-    //         ctx.rect(this.x, this.y, this.width, this.height);
-    //         ctx.stroke();
-    //     };
-    // };
-
+    
+    /**
+     * check collision to another object
+     * @param {object} obj 
+     * @returns is true if collision to an object
+     */
     isCollidingToObject(obj) {
         if ((this.x + this.width) >= (obj.x + obj.offSet.left) && this.x <= (obj.x + obj.width - obj.offSet.right) &&
             (this.y + this.height) >= (obj.y + obj.offSet.top) && this.y <= (obj.y + obj.height)) {
@@ -55,19 +62,25 @@ class DrawableObjects {
         return false;
     };
 
+    /**
+     * jump if collidiing to object is from top
+     * @param {object} obj 
+     * @param {boolean} isColliding 
+     */
     hitAndJumpUp(obj, isColliding) {
-        this.jumping_sound.play();
+        this.world.character.playAnimationSound('jumpSound');
         this.speedY = 20;
         this.jumping = true;
         this.intervalCounter = 0;
         isColliding = true
-        this.world.collisionToEnemie(obj, isColliding, this.onJumpDamage);
-        console.log('hit top');
-        // setTimeout(() => {
-        //     this.jumping_sound.pause();
-        // }, 50);
+        this.world.collisionToEnemie(obj, isColliding, this.onJumpDamage);        
     }
 
+    /**
+     * check collision to another object from top
+     * @param {object} obj 
+     * @returns true if collision from top
+     */
     isCollidingTop(obj) {
         if ((this.y + this.height / 2) <= (obj.y)) {
             return true;
@@ -76,7 +89,11 @@ class DrawableObjects {
         };
     };
 
-
+/**
+ * check collision to an collectableobject
+ * @param {object} obj 
+ * @returns true if colliding
+ */
     isCollidingToItem(obj) {
         if ((this.x + this.width) >= obj.x && this.x <= (obj.x + obj.width) && (this.y + this.height) >= obj.y && this.y <= (obj.y + obj.height)) {
             return true;

@@ -3,7 +3,16 @@ let world;
 let titlescreen;
 let keyboard = new Keyboard();
 let intervalIDs = [];
+let fullScreen = false;
+let soundOn = true;
+let win = new Audio('audio/you-win.mp3');
+let lose = new Audio('audio/you-lose.mp3');
+
+/**
+ * generate World
+ */
 async function generateWorld() {
+    soundOn = true;
     document.getElementById('titelscreen').classList.add('d-none');
     document.getElementById('fullscreen').classList.remove('d-none');
     canvas = document.getElementById('canvas');
@@ -11,6 +20,9 @@ async function generateWorld() {
     world = new World(canvas, keyboard);
 }
 
+/**
+ * checks if the widthscreen is wider as the heighscreen
+ */
 setInterval(() => {
     let screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
     let screenHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
@@ -18,13 +30,13 @@ setInterval(() => {
         document.getElementById('rotatescreen').classList.add('d-none');
     } else {
         document.getElementById('rotatescreen').classList.remove('d-none');
-
     }
-
-
 }, 100);
 
 
+/**
+ * set keydown event
+ */
 window.addEventListener('keydown', (event) => {
     if (event.keyCode == 39) {
         keyboard.Right = true;
@@ -52,6 +64,9 @@ window.addEventListener('keydown', (event) => {
     }
 })
 
+/**
+ * set keyup event
+ */
 window.addEventListener('keyup', (event) => {
     if (event.keyCode == 39) {
         keyboard.Right = false;
@@ -79,13 +94,21 @@ window.addEventListener('keyup', (event) => {
     }
 })
 
+/**
+ * show game in fullscreen
+ */
 function openFullScreen() {
     let fullScreen = document.getElementById('fullscreen');
-    let fullScreenIcon = document.getElementById('get_fullscreen');
+    let canvas = document.getElementById('canvas');
+    canvas.style = 'height: 100%'
+    canvas.style = 'width: 100%'
     enterFullscreen(fullScreen);
-    fullScreenIcon.innerHTML = '<img src="./img/fullscreen.png" onclick="closeFullScreen()">'
 }
 
+/**
+ * show the element in Fullscreen
+ * @param {element} element 
+ */
 function enterFullscreen(element) {
     if (element.requestFullscreen) {
         element.requestFullscreen();
@@ -96,13 +119,9 @@ function enterFullscreen(element) {
     }
 }
 
-function closeFullScreen() {
-    // let fullScreen = document.getElementById('fullscreen');
-    let fullScreenIcon = document.getElementById('get_fullscreen');
-    exitFullscreen();
-    fullScreenIcon.innerHTML = '<img src="./img/fullscreen.png" onclick="openFullScreen()">'
-}
-
+/**
+ * close Fullscreen
+ */
 function exitFullscreen() {
     if (document.exitFullscreen) {
         document.exitFullscreen();
@@ -111,11 +130,53 @@ function exitFullscreen() {
     }
 }
 
+/**
+ * toggle Button Function
+ */
+function toggleFullscreen() {
+if (fullScreen) {
+    fullScreen = false
+    exitFullscreen()
+} else {
+    fullScreen = true;
+    openFullScreen();
+}
+}
+
+/**
+ * mute or Play sound
+ */
+function muteAndPlaySounds() {
+    soungImg = document.getElementById('volume');    
+    if(soundOn) {
+        soundOn = false;
+        soungImg.src = 'img/mute.png'
+    } else {
+        soundOn = true;
+        soungImg.src = 'img/volume.png'
+    }
+}
+
+/**
+ * save all Intervalls in array
+ * @param {function} fn 
+ * @param {number} time 
+ */
 function setStoppableInterval(fn, time) {
     let id = setInterval(fn, time);
     intervalIDs.push(id);
 }
 
-function stoppGame() {
+/**
+ * stopp all game Intervalls
+ * @param {string} isWin 
+ */
+function stoppGame(isWin) {
+    world.world_sound.pause();
+    if (isWin == 'win') {
+        win.play();
+    } else {
+        lose.play();
+    }
     intervalIDs.forEach(clearInterval);
 }

@@ -35,6 +35,7 @@ class Lizard extends Enemie {
     IMAGES_HURT = [
         'img/enemies/lizard/hurt/Hurt1.png',
         'img/enemies/lizard/hurt/Hurt2.png',
+        'img/enemies/lizard/hurt/Hurt3.png',
     ];
 
     IMAGES_DEATH = [

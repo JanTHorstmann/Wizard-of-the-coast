@@ -1,4 +1,6 @@
 class ThrowableObjects extends MovableObject {
+    height = 80;
+    width = 80;
     standardThrowObject = false;
     specialThrowObject = false;
     otherDirection = false;
@@ -43,42 +45,41 @@ class ThrowableObjects extends MovableObject {
         this.world = world;
         this.otherDirection = this.world.character.otherDirection;
         if (spell == 'standardThrowObject') {
+            this.damage = 1;
             this.standardThrowObject = active
         }
         if (spell == 'specialThrowObject') {
+            this.damage = 2;
             this.specialThrowObject = active
         }
-
         this.x = x;
         this.y = y;
         this.loadImages(this.IMAGES_STANDARD_THROW_OBJECT)
         this.loadImages(this.IMAGES_SPECIAL_THROW_OBJECT)
-        this.throw(x, y);
-    }
-
-    throw() {
-        this.height = 80;
-        this.width = 80;
         this.animate();
     }
 
+    /**
+     * start animation sequnce
+     */
     animate() {
         setStoppableInterval(() => {
             if (this.standardThrowObject) {
                 this.throwStandardObject();
             }
-
             if (this.specialThrowObject) {
                 this.throwSpecialObject();
             }
         }, 50);
-    } //end Animation
+    }
 
+    /**
+     * play animation of Standardattack
+     */
     throwStandardObject() {
-        this.standardThrowObject_audio.play();
+        this.playAnimationSound('standard');
         this.throwDirection(20);
-        this.playAnimation(this.IMAGES_STANDARD_THROW_OBJECT);
-        this.damage = 1;
+        this.playAnimation(this.IMAGES_STANDARD_THROW_OBJECT);        
         this.counter++
         if (this.counter >= this.IMAGES_STANDARD_THROW_OBJECT.length) {
             this.counter = 0;
@@ -90,11 +91,13 @@ class ThrowableObjects extends MovableObject {
         }, 500);
     }
 
+    /**
+     * play animation of Specialattack
+     */
     throwSpecialObject() {
-        this.specialThrowObject_audio.play();
+        this.playAnimationSound('special');
         this.throwDirection(50);
-        this.playAnimation(this.IMAGES_SPECIAL_THROW_OBJECT);
-        this.damage = 2;
+        this.playAnimation(this.IMAGES_SPECIAL_THROW_OBJECT);        
         this.counter++
         if (this.counter >= this.IMAGES_SPECIAL_THROW_OBJECT.length) {
             this.counter = 0;
@@ -106,11 +109,30 @@ class ThrowableObjects extends MovableObject {
         }, 1000);
     }
 
+    /**
+     * describes the direction in which the object should move
+     * @param {number} distance 
+     */
     throwDirection(distance) {
         if (this.otherDirection) {
             this.x -= distance;
         } else {
             this.x += distance;
+        }
+    }
+
+    /**
+     * play sound from the attack
+     * @param {string} attackCategory 
+     */
+    playAnimationSound(attackCategory) {
+        if (soundOn) {
+            if (attackCategory == 'standard') {
+                this.standardThrowObject_audio.play();
+            }
+            if (attackCategory == 'special') {
+                this.specialThrowObject_audio.play();
+            }
         }
     }
 

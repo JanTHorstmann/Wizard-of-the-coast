@@ -5,52 +5,55 @@ class Enemie extends MovableObject {
     intervalCounterEnemie = 0;
     energy = 2;
 
-
-
-    //--------------------------------------------------------------------------------------------------//
-    //---------------------------------------animate all Picture----------------------------------------//
-    //--------------------------------------------------------------------------------------------------//
+    /**
+     * start animation sequence
+     */
     animate() {
-        //----------------------------------------move Left-----------------------------------------//
         setStoppableInterval(() => {
             if (!this.isHurt && !this.isDead && !this.isAttack) {
                 this.moveLeft();
             }
         }, 1000 / 60);
-
-        //------------------------------------Walking animation------------------------------------//
         setStoppableInterval(() => {
-            if (!this.isHurt && !this.isDead && !this.isAttack) {
-                this.playAnimation(this.IMAGES_WALKING, this.currentImageEnemie, 'enemie');
-                this.currentImageEnemieHurt = 0;
-            };
-
-            //-------------------------------------Hurt animation-------------------------------------//
-            if (this.isHurt && !this.isDead) {
-                this.hurtAnimation();
-            };
-
-            //-------------------------------------Dead animation-------------------------------------//
-            if (this.isDead) {
-                this.dieAnimation();
-            };
+            this.animatonTypes();
         }, 200);
+    };
 
-        //------------------------------------Attack animation-----------------------------------//
-        setStoppableInterval(() => {
-            if (this.isAttack && !this.isHurt && !this.isDead) {
-                this.attackAnimation();
-            }
-        }, 150);
+    /**
+     * all animations that are available
+     */
+    animatonTypes() {
+        if (!this.isHurt && !this.isDead && !this.isAttack) {
+            this.walkAnimation();
+        };
+        if (this.isAttack && !this.isHurt && !this.isDead) {
+            this.attackAnimation();
+        };
+        if (this.isHurt && !this.isDead) {
+            this.hurtAnimation();
+        };
+        if (this.isDead) {
+            this.dieAnimation();
+        };
+    }
 
-    } //end animate
+    /**
+     * play walk animation
+     */
+    walkAnimation() {
+        this.playAnimation(this.IMAGES_WALKING, this.currentImageEnemie, 'enemie');
+        this.currentImageEnemieHurt = 0;
+    }
 
+    /**
+     * play hurt animation
+     */
     hurtAnimation() {
         this.resetCounter('currentImage');
         if (this.energy > 0) {
             this.playAnimation(this.IMAGES_HURT, this.currentImageEnemieHurt, 'enemie');
             this.intervalCounterEnemie++
-            if (this.intervalCounterEnemie > this.IMAGES_HURT.length) {
+            if (this.intervalCounterEnemie == this.IMAGES_HURT.length) {
                 this.resetCounter();
                 this.isHurt = false;
             }
@@ -61,6 +64,9 @@ class Enemie extends MovableObject {
         };
     }
 
+    /**
+     * play die animation
+     */
     dieAnimation() {
         this.resetCounter('currentImage');
         this.playAnimation(this.IMAGES_DEATH, this.currentImageEnemieHurt, 'enemie');
@@ -70,19 +76,26 @@ class Enemie extends MovableObject {
         };
     }
 
+    /**
+     * play attack animation
+     */
     attackAnimation() {
         this.resetCounter('currentImage');
         this.playAnimation(this.IMAGES_ATTACK, this.currentImageEnemieHurt, 'enemie');
         this.intervalCounterEnemie++
-        if (this.intervalCounterEnemie > this.IMAGES_HURT.length) {
+        if (this.intervalCounterEnemie == this.IMAGES_ATTACK.length) {
             this.resetCounter();
             this.isAttack = false;
         }
     }
 
+    /**
+     * reset the Images counter
+     * @param {string} id 
+     */
     resetCounter(id) {
         if (id == 'currentImage') {
-        this.currentImage = 0;            
+            this.currentImage = 0;
         } else {
             this.currentImageEnemieHurt = 0;
             this.intervalCounterEnemie = 0;
